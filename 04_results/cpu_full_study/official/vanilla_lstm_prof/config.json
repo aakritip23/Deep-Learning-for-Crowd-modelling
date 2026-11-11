@@ -1,0 +1,23 @@
+{
+  "data_root": "../01_original_social_lstm/social-lstm/data",
+  "out_dir": "runs/official/vanilla_lstm_prof",
+  "protocol": "official",
+  "holdout": "",
+  "max_files_per_source": null,
+  "max_train_scenes": null,
+  "epochs": 30,
+  "batch_size": 32,
+  "optim": "rmsprop",
+  "lr": 0.003,
+  "decay": 0.95,
+  "grad_clip": 10.0,
+  "rnn": 128,
+  "emb": 64,
+  "grid": 4,
+  "nbr_size": 4.0,
+  "dropout": 0.5,
+  "no_social": true,
+  "device": "auto",
+  "seed": 0,
+  "patience": 10
+}

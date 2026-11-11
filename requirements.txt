@@ -1,0 +1,7 @@
+# Training, evaluation and figures (03_improved_model)
+numpy>=1.24
+torch>=2.0
+matplotlib>=3.7
+
+# Exploratory data analysis only (02_data)
+pandas>=2.0

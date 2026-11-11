@@ -1,0 +1,40 @@
+device cpu | train scenes 14094 | eval scenes 7047
+params 264069
+epoch 1/30 nll -1.988 | val ADE 1.550 FDE 3.017 Avg 2.284 | 242s
+epoch 2/30 nll -2.843 | val ADE 1.223 FDE 2.384 Avg 1.803 | 339s
+epoch 3/30 nll -3.041 | val ADE 1.032 FDE 1.991 Avg 1.511 | 336s
+epoch 4/30 nll -3.179 | val ADE 1.753 FDE 3.568 Avg 2.661 | 289s
+epoch 5/30 nll -3.237 | val ADE 1.125 FDE 2.224 Avg 1.674 | 231s
+epoch 6/30 nll -3.314 | val ADE 0.968 FDE 1.815 Avg 1.392 | 241s
+epoch 7/30 nll -3.353 | val ADE 0.969 FDE 1.871 Avg 1.420 | 226s
+epoch 8/30 nll -3.399 | val ADE 1.181 FDE 2.390 Avg 1.786 | 230s
+epoch 9/30 nll -3.435 | val ADE 0.944 FDE 1.818 Avg 1.381 | 224s
+epoch 10/30 nll -3.467 | val ADE 0.912 FDE 1.771 Avg 1.341 | 227s
+epoch 11/30 nll -3.512 | val ADE 0.885 FDE 1.681 Avg 1.283 | 224s
+epoch 12/30 nll -3.538 | val ADE 0.940 FDE 1.832 Avg 1.386 | 230s
+epoch 13/30 nll -3.558 | val ADE 0.954 FDE 1.839 Avg 1.397 | 274s
+epoch 14/30 nll -3.590 | val ADE 0.857 FDE 1.619 Avg 1.238 | 286s
+epoch 15/30 nll -3.617 | val ADE 0.954 FDE 1.867 Avg 1.410 | 278s
+epoch 16/30 nll -3.624 | val ADE 0.870 FDE 1.644 Avg 1.257 | 299s
+epoch 17/30 nll -3.644 | val ADE 0.973 FDE 1.877 Avg 1.425 | 366s
+epoch 18/30 nll -3.677 | val ADE 0.880 FDE 1.674 Avg 1.277 | 297s
+epoch 19/30 nll -3.685 | val ADE 0.883 FDE 1.681 Avg 1.282 | 312s
+epoch 20/30 nll -3.683 | val ADE 0.895 FDE 1.727 Avg 1.311 | 330s
+epoch 21/30 nll -3.704 | val ADE 0.902 FDE 1.742 Avg 1.322 | 323s
+epoch 22/30 nll -3.722 | val ADE 0.838 FDE 1.571 Avg 1.204 | 349s
+epoch 23/30 nll -3.738 | val ADE 0.841 FDE 1.575 Avg 1.208 | 365s
+epoch 24/30 nll -3.736 | val ADE 0.852 FDE 1.618 Avg 1.235 | 296s
+epoch 25/30 nll -3.756 | val ADE 0.852 FDE 1.611 Avg 1.232 | 270s
+epoch 26/30 nll -3.755 | val ADE 0.823 FDE 1.546 Avg 1.185 | 268s
+epoch 27/30 nll -3.765 | val ADE 0.849 FDE 1.595 Avg 1.222 | 273s
+epoch 28/30 nll -3.771 | val ADE 0.864 FDE 1.627 Avg 1.245 | 302s
+epoch 29/30 nll -3.789 | val ADE 0.858 FDE 1.625 Avg 1.242 | 303s
+epoch 30/30 nll -3.795 | val ADE 0.850 FDE 1.610 Avg 1.230 | 305s
+
+== best model
+source           n      ADE      FDE      Avg
+biwi           145    0.579    1.055    0.817
+crowds        2211    0.748    1.425    1.087
+mot            107    0.814    1.602    1.208
+stanford      8940    0.846    1.584    1.215
+ALL          11403    0.823    1.546    1.185

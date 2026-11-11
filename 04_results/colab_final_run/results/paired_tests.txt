@@ -1,0 +1,4 @@
+Paired bootstrap over trajectories: diff = B - A in Avg (negative = B better), 95% CI
+official Individual TF -> Social TF           ALL        n= 11403  A 1.075  B 1.042  diff(B-A) -0.0329 [-0.0375, -0.0284]  B better on 54%  -> B better
+official Refined Social LSTM -> Social TF     ALL        n= 11403  A 1.123  B 1.042  diff(B-A) -0.0815 [-0.0912, -0.0715]  B better on 59%  -> B better
+holdout  Individual TF -> Social TF           ALL        n=  7425  A 1.053  B 1.028  diff(B-A) -0.0248 [-0.0314, -0.0189]  B better on 52%  -> B better

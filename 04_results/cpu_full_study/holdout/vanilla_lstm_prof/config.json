@@ -1,0 +1,23 @@
+{
+  "data_root": "../01_original_social_lstm/social-lstm/data",
+  "out_dir": "runs/holdout/vanilla_lstm_prof",
+  "protocol": "holdout",
+  "holdout": "biwi_hotel,crowds_zara02,students003,PETS09-S2L1,bookstore_3,hyang_5,gates_3",
+  "max_files_per_source": null,
+  "max_train_scenes": null,
+  "epochs": 30,
+  "batch_size": 32,
+  "optim": "rmsprop",
+  "lr": 0.003,
+  "decay": 0.95,
+  "grad_clip": 10.0,
+  "rnn": 128,
+  "emb": 64,
+  "grid": 4,
+  "nbr_size": 4.0,
+  "dropout": 0.5,
+  "no_social": true,
+  "device": "auto",
+  "seed": 0,
+  "patience": 10
+}

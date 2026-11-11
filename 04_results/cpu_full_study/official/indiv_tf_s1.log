@@ -1,0 +1,49 @@
+device: cpu
+train samples 22806 | eval samples 11403
+params: 569,752 | vel_scale 0.3520
+epoch 1/30 loss 1.4589 | val ADE 0.780 FDE 1.444 Avg 1.112 (const-vel Avg 1.206) | 96s
+epoch 2/30 loss 1.4136 | val ADE 0.769 FDE 1.425 Avg 1.097 (const-vel Avg 1.206) | 99s
+epoch 3/30 loss 1.3975 | val ADE 0.767 FDE 1.421 Avg 1.094 (const-vel Avg 1.206) | 88s
+epoch 4/30 loss 1.3830 | val ADE 0.767 FDE 1.420 Avg 1.094 (const-vel Avg 1.206) | 83s
+epoch 5/30 loss 1.3762 | val ADE 0.760 FDE 1.411 Avg 1.085 (const-vel Avg 1.206) | 82s
+epoch 6/30 loss 1.3710 | val ADE 0.761 FDE 1.411 Avg 1.086 (const-vel Avg 1.206) | 82s
+epoch 7/30 loss 1.3665 | val ADE 0.752 FDE 1.396 Avg 1.074 (const-vel Avg 1.206) | 79s
+epoch 8/30 loss 1.3578 | val ADE 0.754 FDE 1.400 Avg 1.077 (const-vel Avg 1.206) | 80s
+epoch 9/30 loss 1.3503 | val ADE 0.756 FDE 1.403 Avg 1.080 (const-vel Avg 1.206) | 81s
+epoch 10/30 loss 1.3498 | val ADE 0.750 FDE 1.394 Avg 1.072 (const-vel Avg 1.206) | 48s
+epoch 11/30 loss 1.3457 | val ADE 0.749 FDE 1.392 Avg 1.070 (const-vel Avg 1.206) | 22s
+epoch 12/30 loss 1.3399 | val ADE 0.747 FDE 1.389 Avg 1.068 (const-vel Avg 1.206) | 20s
+epoch 13/30 loss 1.3375 | val ADE 0.746 FDE 1.385 Avg 1.065 (const-vel Avg 1.206) | 19s
+epoch 14/30 loss 1.3329 | val ADE 0.743 FDE 1.381 Avg 1.062 (const-vel Avg 1.206) | 27s
+epoch 15/30 loss 1.3285 | val ADE 0.742 FDE 1.380 Avg 1.061 (const-vel Avg 1.206) | 26s
+epoch 16/30 loss 1.3264 | val ADE 0.743 FDE 1.382 Avg 1.063 (const-vel Avg 1.206) | 23s
+epoch 17/30 loss 1.3240 | val ADE 0.745 FDE 1.384 Avg 1.064 (const-vel Avg 1.206) | 17s
+epoch 18/30 loss 1.3184 | val ADE 0.739 FDE 1.373 Avg 1.056 (const-vel Avg 1.206) | 17s
+epoch 19/30 loss 1.3163 | val ADE 0.742 FDE 1.379 Avg 1.060 (const-vel Avg 1.206) | 17s
+epoch 20/30 loss 1.3136 | val ADE 0.741 FDE 1.378 Avg 1.060 (const-vel Avg 1.206) | 17s
+epoch 21/30 loss 1.3035 | val ADE 0.741 FDE 1.376 Avg 1.058 (const-vel Avg 1.206) | 17s
+epoch 22/30 loss 1.3033 | val ADE 0.737 FDE 1.370 Avg 1.053 (const-vel Avg 1.206) | 18s
+epoch 23/30 loss 1.3015 | val ADE 0.736 FDE 1.369 Avg 1.052 (const-vel Avg 1.206) | 17s
+epoch 24/30 loss 1.3022 | val ADE 0.736 FDE 1.370 Avg 1.053 (const-vel Avg 1.206) | 18s
+epoch 25/30 loss 1.2991 | val ADE 0.737 FDE 1.372 Avg 1.055 (const-vel Avg 1.206) | 17s
+epoch 26/30 loss 1.2976 | val ADE 0.736 FDE 1.370 Avg 1.053 (const-vel Avg 1.206) | 17s
+epoch 27/30 loss 1.2928 | val ADE 0.736 FDE 1.370 Avg 1.053 (const-vel Avg 1.206) | 17s
+epoch 28/30 loss 1.2962 | val ADE 0.736 FDE 1.370 Avg 1.053 (const-vel Avg 1.206) | 17s
+epoch 29/30 loss 1.2941 | val ADE 0.736 FDE 1.370 Avg 1.053 (const-vel Avg 1.206) | 17s
+epoch 30/30 loss 1.2943 | val ADE 0.736 FDE 1.370 Avg 1.053 (const-vel Avg 1.206) | 17s
+
+== best model
+source           n      ADE      FDE      Avg
+biwi           145    0.490    0.861    0.675
+crowds        2211    0.726    1.380    1.053
+mot            107    0.773    1.541    1.157
+stanford      8940    0.742    1.373    1.057
+ALL          11403    0.736    1.369    1.052
+
+== constant velocity (reference)
+source           n      ADE      FDE      Avg
+biwi           145    0.513    0.896    0.705
+crowds        2211    0.780    1.480    1.130
+mot            107    0.827    1.639    1.233
+stanford      8940    0.864    1.601    1.232
+ALL          11403    0.843    1.569    1.206

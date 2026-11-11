@@ -1,0 +1,30 @@
+device cpu | train scenes 16341 | eval scenes 4800
+params 100165
+epoch 1/20 nll 1.484 | val ADE 0.782 FDE 1.517 Avg 1.150 | 158s
+epoch 2/20 nll 1.221 | val ADE 0.757 FDE 1.467 Avg 1.112 | 165s
+epoch 3/20 nll 1.148 | val ADE 0.747 FDE 1.455 Avg 1.101 | 165s
+epoch 4/20 nll 1.096 | val ADE 0.787 FDE 1.574 Avg 1.181 | 150s
+epoch 5/20 nll 1.089 | val ADE 0.731 FDE 1.430 Avg 1.081 | 124s
+epoch 6/20 nll 1.046 | val ADE 0.732 FDE 1.430 Avg 1.081 | 121s
+epoch 7/20 nll 1.020 | val ADE 0.731 FDE 1.430 Avg 1.080 | 121s
+epoch 8/20 nll 1.019 | val ADE 0.723 FDE 1.408 Avg 1.066 | 122s
+epoch 9/20 nll 1.031 | val ADE 0.723 FDE 1.413 Avg 1.068 | 123s
+epoch 10/20 nll 0.993 | val ADE 0.722 FDE 1.412 Avg 1.067 | 122s
+epoch 11/20 nll 1.000 | val ADE 0.718 FDE 1.405 Avg 1.061 | 115s
+epoch 12/20 nll 0.968 | val ADE 0.719 FDE 1.407 Avg 1.063 | 134s
+epoch 13/20 nll 0.958 | val ADE 0.720 FDE 1.413 Avg 1.066 | 135s
+epoch 14/20 nll 0.949 | val ADE 0.714 FDE 1.396 Avg 1.055 | 136s
+epoch 15/20 nll 0.954 | val ADE 0.718 FDE 1.407 Avg 1.063 | 135s
+epoch 16/20 nll 0.943 | val ADE 0.721 FDE 1.416 Avg 1.068 | 135s
+epoch 17/20 nll 0.935 | val ADE 0.718 FDE 1.411 Avg 1.064 | 137s
+epoch 18/20 nll 0.954 | val ADE 0.726 FDE 1.429 Avg 1.078 | 136s
+epoch 19/20 nll 0.936 | val ADE 0.715 FDE 1.402 Avg 1.059 | 138s
+epoch 20/20 nll 0.935 | val ADE 0.711 FDE 1.392 Avg 1.051 | 169s
+
+== best model
+source           n      ADE      FDE      Avg
+biwi           435    0.448    0.820    0.634
+crowds        3240    0.700    1.384    1.042
+mot            321    0.742    1.534    1.138
+stanford      3429    0.752    1.458    1.105
+ALL           7425    0.711    1.392    1.051

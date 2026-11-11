@@ -1,0 +1,35 @@
+# --- not part of the submission -------------------------------------------------------------------
+# leftovers moved out of the project folder (delete this folder by hand)
+zz_delete_manually/
+# the submission report (it carries the author's name and roll number); delete this line to publish it in the repository
+06_report/
+# local Python environments
+venv/
+.venv/
+env/
+
+# --- Python / editor / OS -------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- regenerated caches and outputs of re-running the code ----------------------------------------
+# Social LSTM baseline pre-processing caches (rebuilt automatically)
+*.cpkl
+# outputs of the baseline's own training scripts
+01_original_social_lstm/social-lstm/log/
+01_original_social_lstm/social-lstm/model/
+01_original_social_lstm/social-lstm/plot/
+01_original_social_lstm/social-lstm/result/
+# outputs of run_lab.sh / run_phase*.sh / colab_run.py
+03_improved_model/runs/
+03_improved_model/results_*/
+# model checkpoints, except the final weights archived in 04_results
+*.pt
+*.pth
+!04_results/**/best.pt

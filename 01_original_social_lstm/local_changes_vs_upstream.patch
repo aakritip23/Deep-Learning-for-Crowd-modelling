@@ -1,0 +1,253 @@
+diff --git a/model.py b/model.py
+index 80bd74c..8773c4c 100644
+--- a/model.py
++++ b/model.py
+@@ -67,6 +67,9 @@ class SocialModel(nn.Module):
+         numNodes = grid.size()[0]
+ 
+         # Construct the variable
++        
++        
++        
+         social_tensor = Variable(torch.zeros(numNodes, self.grid_size*self.grid_size, self.rnn_size))
+         if self.use_cuda:
+             social_tensor = social_tensor.cuda()
+@@ -118,7 +121,8 @@ class SocialModel(nn.Module):
+         look_up = args[7]
+ 
+         numNodes = len(look_up)
+-        outputs = Variable(torch.zeros(self.seq_length * numNodes, self.output_size))
++        seq_length = input_data.size(0)
++        outputs = Variable(torch.zeros(seq_length * numNodes, self.output_size))
+         if self.use_cuda:            
+             outputs = outputs.cuda()
+ 
+@@ -134,7 +138,7 @@ class SocialModel(nn.Module):
+             nodeIDs = [int(nodeID) for nodeID in PedsList[framenum]]
+ 
+             if len(nodeIDs) == 0:
+-                # If no peds, then go to the next frame
++                # If no peds, then go to the next framenumNode
+                 continue
+ 
+ 
+@@ -197,10 +201,10 @@ class SocialModel(nn.Module):
+                 cell_states[corr_index.data] = c_nodes
+ 
+         # Reshape outputs
+-        outputs_return = Variable(torch.zeros(self.seq_length, numNodes, self.output_size))
++        outputs_return = Variable(torch.zeros(seq_length, numNodes, self.output_size))
+         if self.use_cuda:
+             outputs_return = outputs_return.cuda()
+-        for framenum in range(self.seq_length):
++        for framenum in range(seq_length):
+             for node in range(numNodes):
+                 outputs_return[framenum, node, :] = outputs[framenum*numNodes + node, :]
+ 
+diff --git a/train.py b/train.py
+index c882b2e..ee8e000 100644
+--- a/train.py
++++ b/train.py
+@@ -108,7 +108,26 @@ def train(args):
+     
+     if not os.path.isdir("log/"):
+       print("Directory creation script is running...")
+-      subprocess.call([f_prefix+'/make_directories.sh'])
++      directories = [
++          "log/SOCIALLSTM/GRU", "log/SOCIALLSTM/LSTM",
++          "log/OBSTACLELSTM/GRU", "log/OBSTACLELSTM/LSTM",
++          "log/VANILLALSTM/GRU", "log/VANILLALSTM/LSTM",
++          "model/SOCIALLSTM/GRU", "model/SOCIALLSTM/LSTM",
++          "model/OBSTACLELSTM/GRU", "model/OBSTACLELSTM/LSTM",
++          "model/VANILLALSTM/GRU", "model/VANILLALSTM/LSTM",
++          "result/SOCIALLSTM/GRU", "result/SOCIALLSTM/LSTM",
++          "result/OBSTACLELSTM/GRU", "result/OBSTACLELSTM/LSTM",
++          "result/VANILLALSTM/GRU", "result/VANILLALSTM/LSTM",
++          "plot/SOCIALLSTM/GRU/plots", "plot/SOCIALLSTM/GRU/videos",
++          "plot/SOCIALLSTM/LSTM/plots", "plot/SOCIALLSTM/LSTM/videos",
++          "plot/OBSTACLELSTM/GRU/plots", "plot/OBSTACLELSTM/GRU/videos",
++          "plot/OBSTACLELSTM/LSTM/plots", "plot/OBSTACLELSTM/LSTM/videos",
++          "plot/VANILLALSTM/GRU/plots", "plot/VANILLALSTM/GRU/videos",
++          "plot/VANILLALSTM/LSTM/plots", "plot/VANILLALSTM/LSTM/videos",
++          "data/validation",
++      ]
++      for directory in directories:
++          os.makedirs(os.path.join(f_prefix, directory), exist_ok=True)
+ 
+     args.freq_validation = np.clip(args.freq_validation, 0, args.num_epochs)
+     validation_epoch_list = list(range(args.freq_validation, args.num_epochs+1, args.freq_validation))
+@@ -198,7 +217,7 @@ def train(args):
+             loss_batch = 0
+             
+             #if we are in a new dataset, zero the counter of batch
+-            if dataset_pointer_ins_grid is not dataloader.dataset_pointer and epoch is not 0:
++            if dataset_pointer_ins_grid != dataloader.dataset_pointer and epoch != 0:
+                 num_batch = 0
+                 dataset_pointer_ins_grid = dataloader.dataset_pointer
+ 
+@@ -206,11 +225,11 @@ def train(args):
+             # For each sequence
+             for sequence in range(dataloader.batch_size):
+                 # Get the data corresponding to the current sequence
+-                x_seq ,_ , d_seq, numPedsList_seq, PedsList_seq = x[sequence], y[sequence], d[sequence], numPedsList[sequence], PedsList[sequence]
++                x_seq, y_seq, d_seq, numPedsList_seq, PedsList_seq = (x[sequence], y[sequence], d[sequence], numPedsList[sequence], PedsList[sequence])
+                 target_id = target_ids[sequence]
+ 
+                 #get processing file name and then get dimensions of file
+-                folder_name = dataloader.get_directory_name_with_pointer(d_seq)
++                folder_name = dataloader.get_directory_name(d_seq)
+                 dataset_data = dataloader.get_dataset_dimension(folder_name)
+ 
+                 #dense vector creation
+@@ -218,15 +237,24 @@ def train(args):
+                 target_id_values = x_seq[0][lookup_seq[target_id], 0:2]
+ 
+                 #grid mask calculation and storage depending on grid parameter
+-                if(args.grid):
+-                    if(epoch is 0):
+-                        grid_seq = getSequenceGridMask(x_seq, dataset_data, PedsList_seq,args.neighborhood_size, args.grid_size, args.use_cuda)
+-                        grids[dataloader.dataset_pointer].append(grid_seq)
+-                    else:
+-                        grid_seq = grids[dataloader.dataset_pointer][(num_batch*dataloader.batch_size)+sequence]
++                if args.grid:
++                    grid_seq = getSequenceGridMask(
++                        x_seq,
++                        dataset_data,
++                        PedsList_seq,
++                        args.neighborhood_size,
++                        args.grid_size,
++                        args.use_cuda
++                    )
+                 else:
+-                    grid_seq = getSequenceGridMask(x_seq, dataset_data, PedsList_seq,args.neighborhood_size, args.grid_size, args.use_cuda)
+-
++                    grid_seq = getSequenceGridMask(
++                        x_seq,
++                        dataset_data,
++                        PedsList_seq,
++                        args.neighborhood_size,
++                        args.grid_size,
++                        args.use_cuda
++                        )
+                 # vectorize trajectories in sequence
+                 x_seq, _ = vectorize_seq(x_seq, PedsList_seq, lookup_seq)
+ 
+@@ -308,12 +336,11 @@ def train(args):
+                 optimizer.zero_grad()
+                 
+ 
+-                # Forward prop
+-                outputs, _, _ = net(x_seq, grid_seq, hidden_states, cell_states, PedsList_seq,numPedsList_seq ,dataloader, lookup_seq)
++                # Forward pass
++                outputs, _, _ = net(x_seq[:-1],grid_seq[:-1],hidden_states,cell_states,PedsList_seq[:-1],numPedsList_seq[:-1],dataloader,lookup_seq)
+ 
+-                
+-                # Compute loss
+-                loss = Gaussian2DLikelihood(outputs, x_seq, PedsList_seq, lookup_seq)
++                # Compare predictions against the corresponding next timesteps
++                loss = Gaussian2DLikelihood(outputs,x_seq[1:],PedsList_seq[1:],lookup_seq)
+                 loss_batch += loss.item()
+ 
+                 # Compute gradients
+@@ -401,10 +428,12 @@ def train(args):
+                         cell_states = cell_states.cuda()
+ 
+                     # Forward prop
+-                    outputs, _, _ = net(x_seq[:-1], grid_seq[:-1], hidden_states, cell_states, PedsList_seq[:-1], numPedsList_seq , dataloader, lookup_seq)
+-
++                    outputs, _, _ = net(x_seq[:-1], grid_seq[:-1], hidden_states, cell_states, PedsList_seq[:-1], numPedsList_seq[:-1] , dataloader, lookup_seq)
++                    y_seq, _ = dataloader.convert_proper_array(y_seq, numPedsList_seq[1:], PedsList_seq[1:])
++                    y_seq, _ = vectorize_seq(y_seq, PedsList_seq[1:], lookup_seq)
+                     # Compute loss
+-                    loss = Gaussian2DLikelihood(outputs, x_seq[1:], PedsList_seq[1:], lookup_seq)
++                    loss = Gaussian2DLikelihood(outputs, y_seq[:-1], PedsList_seq[1:-1], lookup_seq)
++                   
+                     # Extract the mean, std and corr of the bivariate Gaussian
+                     mux, muy, sx, sy, corr = getCoef(outputs)
+                     # Sample from the bivariate Gaussian
+@@ -468,7 +497,7 @@ def train(args):
+                 x, y, d , numPedsList, PedsList ,target_ids = dataloader.next_batch()
+ 
+                 if dataset_pointer_ins is not dataloader.dataset_pointer:
+-                    if dataloader.dataset_pointer is not 0:
++                    if dataloader.dataset_pointer != 0:
+                         print('Finished prosessed file : ', dataloader.get_file_name(-1),' Avarage error : ', err_epoch/num_of_batch)
+                         num_of_batch = 0
+                         epoch_result.append(results)
+diff --git a/utils.py b/utils.py
+index a1b73b9..94c7a0b 100644
+--- a/utils.py
++++ b/utils.py
+@@ -71,7 +71,7 @@ class DataLoader():
+ 
+         # check validation dataset availibility and clip the reuqested number if it is bigger than available validation dataset
+         if self.additional_validation:
+-            if len(self.validation_dataset) is 0:
++            if len(self.validation_dataset) == 0:
+                 print("There is no validation dataset.Aborted.")
+                 self.additional_validation = False
+             else:
+@@ -565,7 +565,7 @@ class DataLoader():
+         #output: seq_lenght (real sequence lenght+1)*max_ped_id+1 (biggest id number in the sequence)*2 (x,y)
+         
+         #get unique ids from sequence
+-        unique_ids = pd.unique(np.concatenate(pedlist).ravel().tolist()).astype(int)
++        unique_ids = pd.unique(np.concatenate(pedlist).ravel()).astype(int)
+         # create a lookup table which maps ped ids -> array indices
+         lookup_table = dict(zip(unique_ids, range(0, len(unique_ids))))
+ 
+@@ -588,7 +588,7 @@ class DataLoader():
+     def get_dataset_path(self, base_path, f_prefix):
+         # get all datasets from given set of directories
+         dataset = []
+-        dir_names = unique_list(self.get_all_directory_namelist())
++        dir_names = unique_list(self.get_all_directory_namelist(os.path.join(f_prefix, base_path)))
+         for dir_ in dir_names:
+             dir_path = os.path.join(f_prefix, base_path, dir_)
+             file_names = get_all_file_names(dir_path)
+@@ -597,10 +597,10 @@ class DataLoader():
+ 
+     def get_file_name(self, offset=0, pointer_type = 'train'):
+         #return file name of processing or pointing by dataset pointer
+-        if pointer_type is 'train':
++        if pointer_type == 'train':
+             return self.data_dirs[self.dataset_pointer+offset].split('/')[-1]
+          
+-        elif pointer_type is 'valid':
++        elif pointer_type == 'valid':
+             return self.data_dirs[self.valid_dataset_pointer+offset].split('/')[-1]
+ 
+     def create_folder_file_dict(self):
+@@ -613,19 +613,24 @@ class DataLoader():
+ 
+ 
+     def get_directory_name(self, offset=0):
+-        #return folder name of file of processing or pointing by dataset pointer
+-        folder_name = self.data_dirs[self.dataset_pointer+offset].split('/')[-2]
++        path = self.data_dirs[offset]
++        folder_name = os.path.basename(os.path.dirname(os.path.normpath(path)))
+         return folder_name
+ 
+     def get_directory_name_with_pointer(self, pointer_index):
+-        # get directory name using pointer index
+-        folder_name = self.data_dirs[pointer_index].split('/')[-2]
++        # Return dataset category for the selected dataset path
++        path = self.data_dirs[pointer_index]
++        folder_name = os.path.basename(os.path.dirname(os.path.normpath(path)))
+         return folder_name
+ 
+-    def get_all_directory_namelist(self):
+-        #return all directory names in this collection of dataset
+-        folder_list = [data_dir.split('/')[-2] for data_dir in (self.base_data_dirs)]
+-        return folder_list
++    def get_all_directory_namelist(self, base_dir):
++        # Return actual subdirectories for the dataset being scanned.
++        if not os.path.isdir(base_dir):
++            raise FileNotFoundError(f"Dataset directory not found: {base_dir}")
++        return [
++            name for name in os.listdir(base_dir)
++            if os.path.isdir(os.path.join(base_dir, name))
++        ]
+ 
+     def get_file_path(self, base, prefix, model_name ='', offset=0):
+         #return file path of file of processing or pointing by dataset pointer
