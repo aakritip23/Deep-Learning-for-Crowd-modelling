@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Pedestrian trajectory prediction with a Social Transformer: simulations on held-out scenes. ME496 UGP, Aakriti Prajapati.">
+<title>Crowd Simulations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a single reading column; figures sit on paper-white plates so the matplotlib output stays legible in both themes. */
+:root {
+  --bg: #F2F4F7;
+  --surface: #FBFCFD;
+  --plate: #FFFFFF;
+  --line: #D6DCE4;
+  --fg: #16202E;
+  --muted: #4F5B6B;
+  --accent: #1C5CAB;
+  --accent-soft: #E3EDF9;
+  --warn: #A1451A;
+  --warn-soft: #FBEDE5;
+  --sans: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1622; --surface: #172131; --plate: #F7F8FA; --line: #2A3647; --fg: #E7ECF3; --muted: #A5B1C2;
+    --accent: #7DB3F0; --accent-soft: #1B2C44; --warn: #F2A37C; --warn-soft: #3A2419; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1622; --surface: #172131; --plate: #F7F8FA; --line: #2A3647; --fg: #E7ECF3; --muted: #A5B1C2;
+  --accent: #7DB3F0; --accent-soft: #1B2C44; --warn: #F2A37C; --warn-soft: #3A2419; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 64px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.5rem; font-weight: 600; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.lede { font-size: 1.15rem; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 16px; }
+header { display: flex; flex-direction: column; gap: 14px; }
+
+.facts { display: flex; flex-wrap: wrap; gap: 10px; }
+.fact { font-family: var(--mono); font-size: 0.85rem; background: var(--accent-soft); color: var(--fg); padding: 4px 10px; border-radius: 6px; }
+
+.key { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.key div { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 0.95rem; }
+.key svg { flex: none; }
+
+.plate { background: var(--plate); border: 1px solid var(--line); border-radius: 12px; padding: 12px; overflow-x: auto; }
+.plate img { display: block; width: 100%; height: auto; }
+figcaption { font-size: 0.9rem; color: var(--muted); }
+figure { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+
+.scenes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 24px; }
+.scene { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.scene.fail { border-color: var(--warn); }
+.scene .plate { padding: 6px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+.tag { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.scene.fail .tag { color: var(--warn); }
+.ade { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ade b { color: var(--fg); font-weight: 600; }
+
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-weight: 600; color: var(--muted); font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; }
+tr:last-child td { border-bottom: none; }
+td.num { font-family: var(--mono); text-align: right; }
+th.num { text-align: right; }
+.better { color: var(--accent); font-weight: 600; }
+.worse { color: var(--warn); font-weight: 600; }
+
+.code { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.code code { font-family: var(--mono); font-size: 0.9rem; overflow-x: auto; white-space: nowrap; flex: 1; min-width: 0; }
+button { font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+ul.notes { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; max-width: 72ch; }
+.muted { color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">ME496 UGP · Deep Learning for Crowd Modelling</p>
+    <h1>Crowd Simulations</h1>
+    <p class="lede">The trained Social Transformer replaying real scenes it has never seen. Every person is watched for 3.2 seconds; the model then predicts their next 4.8 seconds, and we compare that with where they actually walked.</p>
+    <div class="facts">
+      <span class="fact">7 held-out videos</span>
+      <span class="fact">0.4 s per step · 8 observed + 12 predicted</span>
+      <span class="fact">30-epoch model, held-out Avg 1.020 m</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="key-h">
+    <h2 id="key-h">How to read the figures</h2>
+    <div class="key">
+      <div><svg width="44" height="14" aria-hidden="true"><line x1="2" y1="7" x2="42" y2="7" stroke="currentColor" stroke-width="2.5"/><circle cx="12" cy="7" r="2.5" fill="currentColor"/><circle cx="28" cy="7" r="2.5" fill="currentColor"/></svg>Observed path, 3.2 s</div>
+      <div><svg width="44" height="14" aria-hidden="true"><line x1="2" y1="7" x2="42" y2="7" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/></svg>True future, 4.8 s</div>
+      <div><svg width="44" height="14" aria-hidden="true"><line x1="2" y1="7" x2="34" y2="7" stroke="currentColor" stroke-width="4"/><circle cx="37" cy="7" r="5" fill="currentColor"/></svg>Social Transformer prediction</div>
+      <div><svg width="44" height="14" aria-hidden="true"><line x1="2" y1="7" x2="42" y2="7" stroke="currentColor" stroke-width="1.6" stroke-dasharray="1.5 3.5" opacity="0.6"/></svg>Straight line (constant velocity)</div>
+    </div>
+    <p class="muted">One colour per person. In the animations, a filled dot is the prediction and a hollow ring is where the person really was at that moment. ADE is the average distance between the two over the 4.8 seconds.</p>
+  </section>
+
+  <section aria-labelledby="gal-h">
+    <h2 id="gal-h">Six scenes at a glance</h2>
+    <figure>
+      <div class="plate"><img src="media/gallery.png" alt="Six scenes from held-out videos. In five of them the Social Transformer's predicted paths stay closer to the true paths than straight-line predictions; the sixth is a failure case where a walker the model expected to slow down kept going." width="2110" height="1290"></div>
+      <figcaption>Two close encounters, a group walking together, a busy scene, the scene with the largest gain over a straight line, and the scene where the model did worst. Picked automatically by <code>simulate_scenes.py</code> from scenes with 3–10 people.</figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="anim-h">
+    <h2 id="anim-h">Watch the scenes</h2>
+    <p class="muted">Each animation plays the 3.2 s the model observes, then the 4.8 s it predicts, in real time. The clock in the corner shows which phase you are watching.</p>
+    <div class="scenes">
+      <article class="scene">
+        <div class="meta"><span class="tag">Close encounter</span><span class="ade">students003 · 10 people</span></div>
+        <div class="plate"><img src="media/anim_1_encounter.gif" alt="Animation: ten students in two streams crossing; predicted dots stay close to the true positions" width="576" height="576" loading="lazy"></div>
+        <p>Ten students in two streams that cross. The predicted paths bend with the real ones instead of shooting off in straight lines.</p>
+        <p class="ade">ADE <b>0.83 m</b> model · 1.38 m straight line</p>
+      </article>
+      <article class="scene">
+        <div class="meta"><span class="tag">Close encounter</span><span class="ade">students003 · 3 people</span></div>
+        <div class="plate"><img src="media/anim_2_encounter.gif" alt="Animation: a pair of walkers crosses in front of a third person" width="576" height="576" loading="lazy"></div>
+        <p>A pair walking together cuts across a third person’s path. The pair is predicted well. The third person’s late swerve is missed: the model keeps them going straight.</p>
+        <p class="ade">ADE <b>0.72 m</b> model · 1.21 m straight line</p>
+      </article>
+      <article class="scene">
+        <div class="meta"><span class="tag">Walking together</span><span class="ade">hyang_5 · 3 people</span></div>
+        <div class="plate"><img src="media/anim_3_group.gif" alt="Animation: two people walking side by side and a third walker on the Stanford campus" width="576" height="576" loading="lazy"></div>
+        <p>Two people walking side by side on the Stanford campus, plus a third walker. The straight line overshoots; the model stays close.</p>
+        <p class="ade">ADE <b>0.47 m</b> model · 1.12 m straight line</p>
+      </article>
+      <article class="scene">
+        <div class="meta"><span class="tag">Busy scene</span><span class="ade">students003 · 7 people</span></div>
+        <div class="plate"><img src="media/anim_4_busy.gif" alt="Animation: seven people walking mostly in the same direction" width="576" height="576" loading="lazy"></div>
+        <p>Seven people moving through the same area, mostly in one direction. The gain over a straight line is smaller here, because most of them really do walk fairly straight.</p>
+        <p class="ade">ADE <b>0.61 m</b> model · 0.82 m straight line</p>
+      </article>
+      <article class="scene fail">
+        <div class="meta"><span class="tag">Failure case</span><span class="ade">students003 · 3 people</span></div>
+        <div class="plate"><img src="media/anim_6_failure.gif" alt="Animation: the model predicts a walker will slow down, but the walker keeps going" width="576" height="576" loading="lazy"></div>
+        <p>The model expected the walker in green to slow down near the others; they kept walking. Here a straight line is better. It is the worst scene of the selection, shown on purpose.</p>
+        <p class="ade">ADE <b>1.18 m</b> model · 0.82 m straight line</p>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="att-h">
+    <h2 id="att-h">Who does the model look at?</h2>
+    <div class="two">
+      <figure>
+        <div class="plate"><img src="media/attention_1.png" alt="Attention weights of one pedestrian in the ten-person scene: the two nearest neighbours get 17 and 20 percent, distant people 1 to 6 percent, and 36 percent goes to the no-one option" width="1125" height="945"></div>
+      </figure>
+      <div style="display:flex; flex-direction:column; gap:14px; min-width:0">
+        <p>This is the social part of the model made visible. For one walker in the ten-person scene (red), each orange line is the share of attention given to a neighbour at the last observed moment, averaged over the four attention heads.</p>
+        <p>The two people walking right beside the target get the most attention, <b>20 %</b> and <b>17 %</b>. People several metres away get <b>1–6 %</b>. The largest share, <b>36 %</b>, goes to the learned “no one” option: much of what this person does next is explained by their own movement.</p>
+        <p class="muted">That matches the numbers in the report. Neighbours help, but modestly, and mainly when they are close.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="tbl-h">
+    <h2 id="tbl-h">The selected scenes</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Scene</th><th>Video</th><th>Start frame</th><th class="num">People</th><th class="num">ADE model</th><th class="num">ADE straight line</th></tr></thead>
+        <tbody>
+          <tr><td>Close encounter</td><td>students003</td><td class="num">400</td><td class="num">10</td><td class="num better">0.83</td><td class="num">1.38</td></tr>
+          <tr><td>Close encounter</td><td>students003</td><td class="num">2050</td><td class="num">3</td><td class="num better">0.72</td><td class="num">1.21</td></tr>
+          <tr><td>Walking together</td><td>hyang_5</td><td class="num">3228</td><td class="num">3</td><td class="num better">0.47</td><td class="num">1.12</td></tr>
+          <tr><td>Busy scene</td><td>students003</td><td class="num">2310</td><td class="num">7</td><td class="num better">0.61</td><td class="num">0.82</td></tr>
+          <tr><td>Largest gain</td><td>students003</td><td class="num">2390</td><td class="num">3</td><td class="num better">0.77</td><td class="num">1.41</td></tr>
+          <tr><td>Failure case</td><td>students003</td><td class="num">3440</td><td class="num">3</td><td class="num worse">1.18 (worse)</td><td class="num">0.82</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">These six scenes are chosen to illustrate behaviour, so they are not a fair sample. The fair, overall numbers are the ones in the report: Avg 1.020 m on the held-out videos, 13 % below a straight line.</p>
+  </section>
+
+  <section aria-labelledby="how-h">
+    <h2 id="how-h">How these were made</h2>
+    <ul class="notes">
+      <li>Model: the archived 30-epoch Social Transformer trained without the held-out videos (<code>04_results/cpu_full_study/holdout/social_tf/best.pt</code>), run as-is on CPU, without test-time augmentation.</li>
+      <li>Scenes: only the original files of the 7 held-out videos, not their rotated copies, so each scene appears once. Every person is predicted in turn, using only the other people’s observed past, exactly as in evaluation.</li>
+      <li>Unlike the Social LSTM, which outputs a probability cloud, this model outputs one path per person, so the figures show one predicted path rather than a heat map.</li>
+      <li>The attention shares come from the model’s own attention layer, asked to also return its weights.</li>
+    </ul>
+    <div class="code"><code id="cmd">cd 03_improved_model &amp;&amp; python simulate_scenes.py</code><button type="button" id="copy">Copy</button></div>
+    <p class="muted">About 4 minutes on a laptop CPU. Writes the gallery, one PNG per scene, the attention figure, the GIFs and <code>scenes.csv</code> to <code>04_results/simulations/</code>.</p>
+  </section>
+</div>
+
+<script>
+document.getElementById('copy').addEventListener('click', function () {
+  var btn = this, text = document.getElementById('cmd').textContent;
+  function done() { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1500); }
+  try {
+    navigator.clipboard.writeText(text).then(done, select);
+  } catch (e) { select(); }
+  function select() {
+    var r = document.createRange(); r.selectNodeContents(document.getElementById('cmd'));
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+});
+</script>
+
+</html>
